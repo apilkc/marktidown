@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkItDown - Convert files to Markdown instantly</title>
+    <meta name="description" content="Convert PDF, Word, Excel, PowerPoint, Audio, Video, and Images to clean Markdown instantly. Batch processing supported.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- JSZip for zip downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" referrerpolicy="no-referrer"></script>
+    <!-- Marked for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">↓M</div>
+                <div class="logo-text">
+                    <h1>MarkItDown</h1>
+                    <p>Instant file-to-markdown conversion, powered by Microsoft MarkItDown</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="badge">No Sign-up Required</span>
+                <span class="badge secure">100% Secure & Local</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-workspace">
+            <!-- Left Column: Upload and Queue -->
+            <section class="upload-section">
+                <!-- Drag and Drop Zone -->
+                <div class="drop-zone" id="drop-zone">
+                    <input type="file" id="file-input" multiple class="file-input">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <h3>Drag & Drop Files Here</h3>
+                        <p class="upload-hint">or <span class="browse-link">browse your files</span></p>
+                        <p class="supported-formats">Supports PDF, DOCX, XLSX, PPTX, MP3, MP4, PNG, JPG, TXT, HTML & more</p>
+                    </div>
+                </div>
+
+                <!-- File Queue Panel -->
+                <div class="queue-card card">
+                    <div class="card-header">
+                        <h2>Conversion Queue (<span id="queue-count">0</span>)</h2>
+                        <div class="queue-actions">
+                            <button id="clear-queue" class="btn btn-secondary btn-sm" disabled>Clear All</button>
+                            <button id="download-zip" class="btn btn-primary btn-sm" disabled>
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M12 3v12M8 11l4 4 4-4"/>
+                                </svg>
+                                Download ZIP
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="file-list-container">
+                        <div class="empty-state" id="empty-state">
+                            <p>Queue is empty. Upload files to get started.</p>
+                        </div>
+                        <ul class="file-list" id="file-list">
+                            <!-- Dynamically populated files go here -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Preview Pane -->
+            <section class="preview-section">
+                <div class="preview-card card">
+                    <div class="card-header preview-header">
+                        <div class="preview-title">
+                            <h2>Markdown Preview</h2>
+                            <span id="preview-filename" class="preview-filename">Select a file from the queue</span>
+                        </div>
+                        <div class="preview-controls" id="preview-controls" style="display: none;">
+                            <div class="toggle-group">
+                                <button id="btn-toggle-raw" class="toggle-btn active">Raw</button>
+                                <button id="btn-toggle-rendered" class="toggle-btn">Rendered</button>
+                            </div>
+                            <button id="btn-copy" class="btn btn-secondary btn-sm">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                Copy
+                            </button>
+                            <button id="btn-download-single" class="btn btn-primary btn-sm">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M12 3v12M8 11l4 4 4-4"/>
+                                </svg>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-body">
+                        <!-- Empty state for preview -->
+                        <div class="preview-empty" id="preview-empty">
+                            <svg class="preview-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            <p>Click "Preview" on any completed file to view its markdown content.</p>
+                        </div>
+                        
+                        <!-- Raw Markdown text area -->
+                        <pre class="preview-code-wrapper" id="preview-code-wrapper" style="display: none;"><code id="preview-code" class="language-markdown"></code></pre>
+                        
+                        <!-- Rendered Markdown HTML area -->
+                        <div class="preview-rendered" id="preview-rendered" style="display: none;"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>MarkItDown Web Application &copy; 2026. Made with ❤️ using FastAPI and Microsoft MarkItDown.</p>
+        </footer>
+    </div>
+
+    <!-- JS app script -->
+    <script src="app.js"></script>
+</body>
+</html>

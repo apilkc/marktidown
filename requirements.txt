@@ -1,0 +1,6 @@
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
+markitdown[all]>=0.0.1a1
+speechrecognition>=3.10.0
+pydub>=0.25.1
