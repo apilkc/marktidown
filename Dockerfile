@@ -22,5 +22,5 @@ RUN mkdir -p temp_uploads
 # Expose port (default for Render/Railway/etc.)
 EXPOSE 8000
 
-# Start application using uvicorn binding to all network interfaces
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start application using uvicorn binding to the port provided by the environment
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]
